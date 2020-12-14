@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.elsys.scheduler.service.impl.LogPcsEssTaskMapper">
+	
+	<select id="getPcsEssDataMap" parameterType="paramMap" resultType="paramMap">
+		SELECT
+				A.house_id
+				, SUM(A.pcs_bat_c_power)AS pcs_bat_c_power
+				, SUM(A.pcs_bat_dc_power)AS pcs_bat_dc_power
+				, C.pcs_bat_soc AS pcs_bat_soc
+				, SUM(A.pcs_pv_power) AS pcs_pv_power
+			
+		FROM
+				data_pcs_ess_v2 AS A
+		INNER JOIN 
+		(
+			SELECT 
+				 B.house_id
+				,B.pcs_bat_soc
+			FROM 
+				data_pcs_ess_v2 AS B
+			WHERE 
+				B.reg_dt BETWEEN DATE_ADD(DATE_FORMAT(NOW(), '%Y-%m-%d %H'), INTERVAL -1 HOUR) AND DATE_FORMAT(NOW(), '%Y-%m-%d %H:00:00')
+			ORDER BY 
+				B.reg_dt DESC LIMIT 1
+		)AS C
+		ON A.house_id = C.house_id
+		
+		WHERE 
+			A.reg_dt BETWEEN DATE_ADD(DATE_FORMAT(NOW(), '%Y-%m-%d %H'), INTERVAL -1 HOUR) AND DATE_FORMAT(NOW(), '%Y-%m-%d %H:00:00')
+			AND A.house_id = 'Yongin_Raemian_101_603'
+		GROUP BY 
+			A.house_id
+	</select>
+	
+	<insert id="insetLogPcsEssHourData" parameterType="hashmap">
+
+		INSERT INTO LOG_PCS_ESS_HOUR
+		(
+			house_id
+			, log_day
+			, log_hour
+			, reg_dt
+			, charge_hour
+			, discharge_hour
+			, soc_hour
+			, gen_eng_day
+		) VALUES (
+			#{house_id}
+			, DATE_FORMAT(now(), '%Y-%m-%d')
+			, DATE_FORMAT(now(), '%H')
+			, now()
+			, #{charge_hour}
+			, #{discharge_hour}
+			, #{soc_hour}
+			, #{gen_eng_day}
+			
+		)
+		
+	</insert>
+	
+	<insert id="insetLogPcsEssDayData" parameterType="hashmap">
+		<![CDATA[
+		INSERT INTO LOG_PCS_ESS_DAY
+		(
+			house_id
+			, log_day
+			, reg_dt
+			, charge_day
+			, discharge_day
+			, soc_day
+			, gen_eng_day
+		) VALUES (
+			#{house_id}
+			, DATE_FORMAT(now(), '%Y-%m-%d')
+			, now()
+			, #{charge_hour}
+			, #{discharge_hour}
+			, #{soc_hour}
+			, #{gen_eng_day}
+			
+		)
+		ON DUPLICATE KEY 
+		UPDATE
+			charge_day = charge_day + #{charge_hour}
+			,discharge_day = discharge_day + #{discharge_hour}
+			,soc_day = #{soc_hour}
+			,gen_eng_day =charge_day+ #{gen_eng_day}
+			,reg_dt = now()
+		]]> 
+	</insert>
+	
+	<select id="getPcsEssDayDataMap" parameterType="paramMap" resultType="paramMap">
+		SELECT
+				A.house_id
+				, DATE_FORMAT(A.reg_dt,'%Y-%m')AS log_month
+				, SUM(A.charge_day)AS charge_month
+				, SUM(A.discharge_day)AS discharge_month
+				, C.soc_day AS soc_month
+		FROM
+				log_pcs_ess_day AS A
+		INNER JOIN 
+		(
+			SELECT 
+				B.house_id
+				,B.soc_day
+			FROM 
+				log_pcs_ess_day AS B
+			WHERE 
+				DATE_FORMAT(B.reg_dt, '%Y-%m-%d') = DATE_FORMAT(DATE_ADD(now(), interval -1 hour), '%Y-%m-%d')
+			ORDER BY 
+				B.reg_dt desc limit 1
+		)AS C
+		ON A.house_id = C.house_id
+		
+		WHERE 
+			DATE_FORMAT(A.reg_dt, '%Y-%m-%d') = DATE_FORMAT(DATE_ADD(now(), interval -1 hour), '%Y-%m-%d')
+			AND A.house_id = #{house_id}
+		GROUP BY 
+			A.house_id
+	</select>
+	
+	<insert id="insetLogPcsEssMonthData" parameterType="hashmap">
+		<![CDATA[
+		INSERT INTO LOG_PCS_ESS_MONTH
+		(
+			house_id
+			, log_month
+			, reg_dt
+			, charge_month
+			, discharge_month
+			, soc_month
+		) VALUES (
+			#{house_id}
+			, #{log_month}
+			, now()
+			, #{charge_month}
+			, #{discharge_month}
+			, #{soc_month}
+			
+		)
+		ON DUPLICATE KEY 
+		UPDATE
+			charge_month = charge_month + #{charge_month}
+			,discharge_month = discharge_month + #{discharge_month}
+			,soc_month = #{soc_month}
+			,reg_dt = now()
+		]]> 
+	</insert>
+	
+</mapper>

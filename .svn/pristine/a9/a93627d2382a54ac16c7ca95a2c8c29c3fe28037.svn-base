@@ -1,0 +1,21 @@
+# MYSQL \uacf5\ud1b5
+Globals.DbType=mysql
+#log4jdbc \uc801\uc6a9 \ubc29\uc2dd
+Globals.DriverClassName=net.sf.log4jdbc.DriverSpy
+#log4jdbc \uc81c\uc678 \ubc29\uc2dd
+#Globals.DriverClassName=com.mysql.jdbc.Driver
+Globals.MaxActive=20
+Globals.MaxIdle=5
+Globals.MaxWait=10000
+
+#log4jdbc \uc801\uc6a9 \ubc29\uc2dd
+#Globals.Url=jdbc:mysql://110.10.129.92:3306/onm?characterEncoding=UTF-8&allowMultiQueries=true&&autoReconnect=true&failOverReadOnly=false&maxReconnects=10&useSSL=false
+Globals.Url=jdbc:mysql://192.168.20.36:3306/ah_hems_v2?characterEncoding=UTF-8&allowMultiQueries=true&&autoReconnect=true&failOverReadOnly=false&maxReconnects=10&useSSL=false
+
+#\ub85c\uceecDB\uacc4\uc815 ID/PW\uc124\uc815
+#Globals.UserName =onm
+#Globals.Password =onm!@12
+
+Globals.UserName =hems
+Globals.Password =hems@123
+

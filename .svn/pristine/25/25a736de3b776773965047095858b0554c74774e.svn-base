@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xmlns:task="http://www.springframework.org/schema/task"
+		xsi:schemaLocation="http://www.springframework.org/schema/beans
+				http://www.springframework.org/schema/beans/spring-beans.xsd
+				http://www.springframework.org/schema/task
+				http://www.springframework.org/schema/task/spring-task-4.0.xsd">
+	<bean id="pcsEss" class="com.elsys.scheduler.web.PcsEssTask"/>
+	<bean id="smartMeter" class="com.elsys.scheduler.web.SmartMeterTask"/>
+	<bean id="logPcsEss" class="com.elsys.scheduler.web.LogPcsEssTask"/>
+	<bean id="backUp" class="com.elsys.scheduler.web.BackUpTask"/>
+	
+	<task:scheduler id="HemsPcsEssScheduler"/>
+	<task:scheduled-tasks scheduler="HemsPcsEssScheduler">
+	
+		<!-- cron : 초 분 시 일 월 년 -->
+		<!--
+			0 0 * * * * : 매일 매시 시작 시점
+			*/10 * * * * * : 10초 간격
+			0 0 8-10 * * * : 매일 8,9,10시
+			0 0/30 8-10 * * * : 매일 8:00, 8:30, 9:00, 9:30, 10:00
+			0 0 9-17 * * MON-FRI : 주중 9시부터 17시까지
+			0 0 0 25 12 ? : 매년 크리스마스 자정
+		-->
+		
+
+		
+	
+<!-- 		크로센트 클라우드 api이용 PCS_ESS 조회 S		 -->
+		<task:scheduled ref="pcsEss" method="pcsEssData" cron="0 0/1 * * * *" /> <!-- 매일 1분마다 -->
+<!--  		크로센트 클라우드 api이용 PCS_ESS 조회 E -->
+ 		
+<!--  		현재날짜 기준 3일 이전 데이터 삭제 S		 -->
+		<task:scheduled ref="pcsEss" method="pcsEssDataDel" cron="0 2 0 * * *" /> <!-- 아무 요일, 매월, 매일, A.M 12시 2분 -->
+<!--  		현재날짜 기준 3일 이전 데이터 삭제 S -->
+ 			<!-- 
+ 		================================================================================================================
+ 		
+ 		크로센트 클라우드 api이용 SMARTMETER 조회 S		
+		<task:scheduled ref="smartMeter" method="smartMeterData" cron="0 0/1 * * * *" /> 매일 1분마다
+ 		크로센트 클라우드 api이용 SMARTMETER 조회 E
+ 		
+ 		SMARTMETER 현재날짜 기준 3일 이전 데이터 삭제 S		
+		<task:scheduled ref="smartMeter" method="smartMeterDataDel" cron="0 2 0 * * *" /> 아무 요일, 매월, 매일, A.M 12시 2분
+ 		SMARTMETER 현재날짜 기준 3일 이전 데이터 삭제 S -->
+ 		
+ 		
+ 		
+ 		
+ 		
+ 		<!-- ================================================================================================================ -->
+ 		
+ 		
+ 		
+<!-- 		LOG_HOUR, LOG_DAY PCS_ESS DATA 적재 S		 -->
+		<task:scheduled ref="logPcsEss" method="logPcsEssDataDel" cron="0 2 0-23 * * *" /><!-- 아무 요일, 매월, 매일, 매시 2분 -->
+<!--  		LOG_HOUR, LOG_DAY PCS_ESS DATA 적재 E		 -->
+ 		
+<!--  		LOG_MONTH PCS_ESS DATA 적재 S		 -->
+		<task:scheduled ref="logPcsEss" method="logPcsEssMonthDataDel" cron="0 2 0 * * *" /> <!-- 아무 요일, 매월, 매일, A.M 12시 2분 -->
+<!--  		LOG_MONTH PCS_ESS DATA 적재 E -->
+ 		
+
+
+<!--  		DATA_PCS_ESS_V2 백업 S		 -->
+		<task:scheduled ref="backUp" method="backUpRun" cron="0 1 */1 * * *" /> <!-- 아무 요일, 매월, 매일, A.M 12시 2분 -->
+<!--  		DATA_PCS_ESS_V2 백업 E -->
+ 		
+
+ 	
+	</task:scheduled-tasks>
+	
+</beans>
+
+<!--
+시간설정 가이드
+
+초 0-59 , - * /
+분 0-59 , - * /
+시 0-23 , - * /
+일 1-31 , - * ? / L W
+월 1-12 or JAN-DEC , - * /
+요일 1-7 or SUN-SAT , - * ? / L #
+년(옵션) 1970-2099 , - * /
+* : 모든 값
+? : 특정 값 없음
+- : 범위 지정에 사용
+, : 여러 값 지정 구분에 사용
+/ : 초기값과 증가치 설정에 사용
+L : 지정할 수 있는 범위의 마지막 값
+W : 월~금요일 또는 가장 가까운 월/금요일
+# : 몇 번째 무슨 요일 2#1 => 첫 번째 월요일
+
+초 분 시 일 월 주(년)
+ "0 0 12 * * ?" : 아무 요일, 매월, 매일 12:00:00
+ "0 15 10 ? * *" : 모든 요일, 매월, 아무 날이나 10:15:00
+ "0 15 10 * * ?" : 아무 요일, 매월, 매일 10:15:00
+ "0 15 10 * * ? *" : 모든 연도, 아무 요일, 매월, 매일 10:15
+ "0 15 10 * * ? 2005" : 2005년 아무 요일이나 매월, 매일 10:15
+ "0 * 14 * * ?" : 아무 요일, 매월, 매일, 14시 매분 0초
+ "0 0/5 14 * * ?" : 아무 요일, 매월, 매일, 14시 매 5분마다 0초
+ "0 0/5 14,18 * * ?" : 아무 요일, 매월, 매일, 14시, 18시 매 5분마다 0초
+ "0 0-5 14 * * ?" : 아무 요일, 매월, 매일, 14:00 부터 매 14:05까지 매 분 0초
+ "0 10,44 14 ? 3 WED" : 3월의 매 주 수요일, 아무 날짜나 14:10:00, 14:44:00
+ "0 15 10 ? * MON-FRI" : 월~금, 매월, 아무 날이나 10:15:00
+ "0 15 10 15 * ?" : 아무 요일, 매월 15일 10:15:00
+ "0 15 10 L * ?" : 아무 요일, 매월 마지막 날 10:15:00
+ "0 15 10 ? * 6L" : 매월 마지막 금요일 아무 날이나 10:15:00
+ "0 15 10 ? * 6L 2002-2005" : 2002년부터 2005년까지 매월 마지막 금요일 아무 날이나 10:15:00
+ "0 15 10 ? * 6#3" : 매월 3번째 금요일 아무 날이나 10:15:00
+-->
+
+

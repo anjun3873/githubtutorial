@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.elsys.scheduler.service.impl.SmartMeterTaskMapper">
+	
+	<!-- device ID 가져오기 -->
+	<select id="getDeviceIdList" parameterType="paramMap" resultType="paramMap">
+		SELECT 
+			DEVICE_ID
+		FROM 
+			TB_DEVICE_INFO
+		WHERE
+			HOUSE_ID = #{houseId}
+	</select>
+	
+	<!-- 순시 SMARTMETER 삽입 -->
+	<insert id="insertSmartMeter" parameterType="paramMap">
+		INSERT INTO DATA_METER (
+			house_id
+			, device_id
+			, up_dt
+			, voltage
+			, current
+			, powerfactor
+			, momen_power
+			, cumul_power
+			, switch_status
+			, firmware_version
+		) VALUES (
+			#{houseId}
+			, #{deviceId}
+			, #{reg_dt}
+			, #{voltage}
+			, #{current}
+			, #{powerfactor}
+			, #{momen_power}
+			, #{cumul_power}
+			, #{switch_status}
+			, #{firmware_version}
+		)
+
+	</insert>
+	
+	<!-- 순시 SMARTMETER 3일전 데이터 삭제 -->
+	<delete id="delSmartMeterData" parameterType="paramMap">
+		<![CDATA[
+		DELETE FROM DATA_METER WHERE DATE_FORMAT(UP_DT, '%Y-%m-%d') <= (CURDATE()- INTERVAL 4 DAY)
+		]]>
+	</delete>
+	
+</mapper>

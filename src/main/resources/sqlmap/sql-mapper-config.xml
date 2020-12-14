@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN" "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+	<settings>
+		<setting name="mapUnderscoreToCamelCase" value="true"/>
+		<setting name="jdbcTypeForNull" value="NULL"/>
+	</settings>
+	<typeAliases>
+		<typeAlias alias="paramMap" type="java.util.HashMap"/>
+		<typeAlias alias="int" type="java.lang.Integer"/>
+	</typeAliases>
+	<mappers>
+		<mapper resource="sqlmap/mysql/HemsPcsEssSQL.xml"/>				<!-- PCS-ESS  -->
+		<mapper resource="sqlmap/mysql/HemsSmartMeterSQL.xml"/>			<!-- SMART-METER -->
+		<mapper resource="sqlmap/mysql/HemsLogPcsEssSQL.xml"/>			<!-- LOG-PCS-ESS  -->
+		<mapper resource="sqlmap/mysql/HemsBackUpSQL.xml"/>			<!-- BACKUP  -->
+	</mappers>
+</configuration>
